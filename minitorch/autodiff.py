@@ -22,8 +22,14 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
+    arg1 = list(vals)
+    arg1[arg] += epsilon
+    fx1 = f(*arg1)
+    arg1[arg] -= 2 * epsilon
+    fx = f(*arg1)
+    return (fx1 - fx) / (2 * epsilon)
     # TODO: Implement for Task 1.1.
-    raise NotImplementedError("Need to implement for Task 1.1")
+    #raise NotImplementedError("Need to implement for Task 1.1")
 
 
 variable_count = 1
@@ -61,8 +67,24 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
+    Visited = []
+    result = []
+
+    def vistit(node):
+        if node.is_constant() or node.unique_id in Visited:
+            return
+        Visited.append(node)
+        for parent in node.parents:
+            vistit(parent)
+        Visited.append(node.unique_id)
+        result.insert(0,node)
+    
+    vistit(variable)
+
+    return result
+
     # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    #raise NotImplementedError("Need to implement for Task 1.4")
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -76,8 +98,27 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
+
+    topo = topological_sort(variable)
+    node2deriv = {}
+    node2deriv[variable.unique_id] = deriv
+    for n in topo:
+        if n.is_leaf():
+            continue
+        if n.unique_id in node2deriv.keys():
+            deriv = node2deriv[n.unique_id]
+        deriv_tmp = n.chain_rule(deriv)
+        for key, item in deriv_tmp:
+            if key.is_leaf(): 
+                key.accumulate_derivative(item)
+                continue
+            if key.unique_id in node2deriv.keys():
+                node2deriv[key.unique_id] += item
+            else:
+                node2deriv[key.unique_id] = item
+
     # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    #raise NotImplementedError("Need to implement for Task 1.4")
 
 
 @dataclass

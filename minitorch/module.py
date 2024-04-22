@@ -31,11 +31,26 @@ class Module:
 
     def train(self) -> None:
         "Set the mode of this module and all descendent modules to `train`."
-        raise NotImplementedError("Need to include this file from past assignment.")
+        def update_training(module: Module) -> None:
+            module.training = True
+            for child in module.modules():
+                update_training(child)
+
+        update_training(self)
+
+        # TODO: Implement for Task 0.4.
+        #raise NotImplementedError("Need to implement for Task 0.4")
 
     def eval(self) -> None:
         "Set the mode of this module and all descendent modules to `eval`."
-        raise NotImplementedError("Need to include this file from past assignment.")
+        def update_eval(module: Module) -> None:
+            module.training = False
+            for child in module.modules():
+                update_eval(child)
+        update_eval(self)
+
+        # TODO: Implement for Task 0.4.
+        #raise NotImplementedError("Need to implement for Task 0.4")
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """
@@ -45,11 +60,23 @@ class Module:
         Returns:
             The name and `Parameter` of each ancestor parameter.
         """
-        raise NotImplementedError("Need to include this file from past assignment.")
+        res = {}
+        def _collect(name, module):
+            prefix = name + "." if name else ""
+            for key, val in module._parameters.items():
+                res[prefix + key] = val
+            for key, mod in module._modules.items():
+                _collect(prefix + key, mod)
+        _collect("", self)
+        return list(res.items())
+        # TODO: Implement for Task 0.4.
+        #raise NotImplementedError("Need to implement for Task 0.4")
 
     def parameters(self) -> Sequence[Parameter]:
         "Enumerate over all the parameters of this module and its descendents."
-        raise NotImplementedError("Need to include this file from past assignment.")
+        return [val for _, val in self.named_parameters()]
+        # TODO: Implement for Task 0.4.
+        #raise NotImplementedError("Need to implement for Task 0.4")
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """
@@ -115,9 +142,9 @@ class Module:
 
 class Parameter:
     """
-    A Parameter is a special container stored in a `Module`.
+    A Parameter is a special container stored in a :class:`Module`.
 
-    It is designed to hold a `Variable`, but we allow it to hold
+    It is designed to hold a :class:`Variable`, but we allow it to hold
     any value for testing.
     """
 
