@@ -10,8 +10,11 @@ import minitorch
 class Network(minitorch.Module):
     def __init__(self, hidden_layers):
         super().__init__()
+        self.layer1 = Linear(2,hidden_layers)
+        self.layer2 = Linear(hidden_layers,hidden_layers)
+        self.layer3 = Linear(hidden_layers,1)
         # TODO: Implement for Task 1.5.
-        raise NotImplementedError("Need to implement for Task 1.5")
+        #raise NotImplementedError("Need to implement for Task 1.5")
 
     def forward(self, x):
         middle = [h.relu() for h in self.layer1.forward(x)]
@@ -40,8 +43,13 @@ class Linear(minitorch.Module):
             )
 
     def forward(self, inputs):
+        y = [b.value for b in self.bias]
+        for i, x in enumerate(inputs):
+            for j in range(len(y)):
+                y[j] = y[j] + x * self.weights[i][j].value
+        return y
         # TODO: Implement for Task 1.5.
-        raise NotImplementedError("Need to implement for Task 1.5")
+        #raise NotImplementedError("Need to implement for Task 1.5")
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
@@ -66,6 +74,7 @@ class ScalarTrain:
 
         losses = []
         for epoch in range(1, self.max_epochs + 1):
+            #print("epoch:", epoch)
             total_loss = 0.0
             correct = 0
             optim.zero_grad()
